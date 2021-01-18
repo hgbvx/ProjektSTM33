@@ -32,6 +32,7 @@
 /* USER CODE BEGIN Includes */
 #include "bmp280.h"
 #include "bmp280_defs.h"
+#include "arm_math.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -55,8 +56,14 @@
 
 /* USER CODE BEGIN PV */
 char  rx_buffer [2];
-int inc = 0; // Wypelnienie PWM
+float duty = 0; // Wypelnienie PWM
+float inc = 30; //temperatura zadana
 int temporary; // Zmienna tymczasowa
+float K_P_CMSIS = 100;
+float K_I_CMSIS = 0.025;
+float K_D_CMSIS = 20;
+float pid_error;
+float pid_error_abs;
 
 /* USER CODE END PV */
 
@@ -100,8 +107,6 @@ struct bmp280_uncomp_data bmp280_1_data;
 
 int32_t temp32;
 double temp;
-int32_t pres32;
-double pres;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -169,13 +174,19 @@ double pres;
 
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_4); // Start PWM
 
+  arm_pid_instance_f32 PID;
+
+  PID.Kp = K_P_CMSIS;
+  PID.Ki = K_I_CMSIS;
+  PID.Kd = K_D_CMSIS;
+
+  arm_pid_init_f32(&PID, 1); //Inicjalizacja PID
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  __HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_4,inc); // Nadpisanie wartości wypełnienia PWM kanał 4
 	  //Read BMP280 sensor
       /* Reading the raw data from sensor */
       rslt = bmp280_get_uncomp_data(&bmp280_1_data, &bmp280_1);
@@ -185,19 +196,36 @@ double pres;
 
       /* Getting the compensated temperature as floating point value */
       rslt = bmp280_get_comp_temp_double(&temp, bmp280_1_data.uncomp_temp, &bmp280_1);
-      //int itemp = (int)temp;
-      //rslt = bmp280_get_comp_pres_32bit(&pres32, bmp280_1_data.uncomp_press, &bmp280_1);
 
-      /* Getting the compensated temperature as floating point value */
-      //rslt = bmp280_get_comp_pres_double(&pres, bmp280_1_data.uncomp_press, &bmp280_1);
-      //int ipres = (int)pres;
       /* Sleep time between measurements = BMP280_ODR_250_MS */
        bmp280_1.delay_ms(1000);
 
-       sprintf(str, "%f", temp);
+       pid_error = temp - inc; //blad
+       pid_error_abs = abs(pid_error);
+       duty = arm_pid_f32(&PID, pid_error_abs); //wypelnienie PWM
 
-       tx_status = HAL_UART_Transmit(&huart3,(uint8_t*) str, 5, 100); // Wyslanie temperatury
-       HAL_Delay(1000); //czas odczytu
+       if (duty > 100) {
+                       duty = 100;
+                   } else if (duty < 0) {
+                       duty = 0;
+                   }
+
+       if (pid_error >0) {
+    	   //zalacz wntylator
+    	   __HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_4,0); //wylacz grzalke
+       }
+       else if(pid_error <0){
+    	   __HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_4,duty); //zalacz grzalke
+    	   //wylacz wentylator
+       }
+
+
+       //sprintf(str, "%f", temp);
+
+       //tx_status = HAL_UART_Transmit(&huart3,(uint8_t*) str, 5, 100); // Wyslanie temperatury
+       //HAL_Delay(1000); //czas odczytu
+
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
