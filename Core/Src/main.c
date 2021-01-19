@@ -58,7 +58,7 @@
 char  rx_buffer [2];
 float duty = 0; // Wypelnienie PWM
 float inc = 30; //temperatura zadana
-int temporary; // Zmienna tymczasowa
+
 float K_P_CMSIS = 100;
 float K_I_CMSIS = 0.025;
 float K_D_CMSIS = 20;
@@ -79,12 +79,13 @@ int8_t bmp280_spi_reg_read (uint8_t cs, uint8_t reg_addr, uint8_t *reg_data, uin
 
 void  HAL_UART_RxCpltCallback(UART_HandleTypeDef  *huart)
 {
+	HAL_UART_Receive_IT   (&huart3  , (uint8_t*) rx_buffer  , 2); //Zadawanie wypełnienia  PWM do tranzystora [0 3.3V]
+
 	if (huart->Instance == USART3)
 	{
-		temporary = ((int)rx_buffer [1] - 48) +   ((int)rx_buffer [0] - 48)*10;
-		inc = temporary;
+		inc = (((float)rx_buffer [1] - 48) +   ((float)rx_buffer [0] - 48)*10);
+
 	}
-	HAL_UART_Receive_IT   (&huart3  , (uint8_t*) rx_buffer  , 2); //Zadawanie wypełnienia  PWM do tranzystora [0 3.3V]
 }
 
 /* USER CODE END 0 */
@@ -140,7 +141,7 @@ double temp;
   MX_TIM7_Init();
   /* USER CODE BEGIN 2 */
 
-  HAL_UART_Receive_IT   (&huart3  , (uint8_t*) rx_buffer  , 3);
+  HAL_UART_Receive_IT   (&huart3  , (uint8_t*) rx_buffer  , 2);
 
 
   HAL_StatusTypeDef tx_status = HAL_OK;
@@ -200,30 +201,47 @@ double temp;
       /* Sleep time between measurements = BMP280_ODR_250_MS */
        bmp280_1.delay_ms(1000);
 
-       pid_error = temp - inc; //blad
-       pid_error_abs = abs(pid_error);
-       duty = arm_pid_f32(&PID, pid_error_abs); //wypelnienie PWM
+       pid_error = inc - temp; //blad
+       //pid_error_abs = abs(pid_error);
+       if (pid_error < 0)
+    	   pid_error_abs = -pid_error;
+       else if (pid_error > 0)
+		   pid_error_abs = pid_error;
+       else if (pid_error == 0)
+    	   pid_error_abs = 0;
+       duty = arm_pid_f32(&PID, pid_error*10); //wypelnienie PWM
 
-       if (duty > 100) {
-                       duty = 100;
+       if (duty > 1000) {
+                       duty = 1000;
                    } else if (duty < 0) {
                        duty = 0;
                    }
 
-       if (pid_error >0) {
+
+
+       //if(inc - temp < 2)
+    	 //  duty /= 3;
+
+	   __HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_4,duty); //zalacz grzalke
+
+
+	   //__HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_4,duty*10); //zalacz grzalke
+
+
+    /*   if (pid_error >0) {
     	   //zalacz wntylator
     	   __HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_4,0); //wylacz grzalke
        }
        else if(pid_error <0){
     	   __HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_4,duty); //zalacz grzalke
     	   //wylacz wentylator
-       }
+       } */
 
 
-       //sprintf(str, "%f", temp);
+       sprintf(str, "%f", temp);
 
-       //tx_status = HAL_UART_Transmit(&huart3,(uint8_t*) str, 5, 100); // Wyslanie temperatury
-       //HAL_Delay(1000); //czas odczytu
+       tx_status = HAL_UART_Transmit(&huart3,(uint8_t*) str, 5, 100); // Wyslanie temperatury
+      //HAL_Delay(100); //czas odczytu
 
 
     /* USER CODE END WHILE */
