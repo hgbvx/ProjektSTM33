@@ -81,10 +81,10 @@ void  HAL_UART_RxCpltCallback(UART_HandleTypeDef  *huart)
 {
 	if (huart->Instance == USART3)
 	{
-		temporary = ((int)rx_buffer [2] - 48) +   ((int)rx_buffer [1] - 48)*10 + ((int)rx_buffer [0] - 48)*100;
-		inc = temporary*10;
+		temporary = ((int)rx_buffer [1] - 48) +   ((int)rx_buffer [0] - 48)*10;
+		inc = temporary;
 	}
-	HAL_UART_Receive_IT   (&huart3  , (uint8_t*) rx_buffer  , 3); //Zadawanie wypełnienia  PWM do tranzystora [0 3.3V]
+	HAL_UART_Receive_IT   (&huart3  , (uint8_t*) rx_buffer  , 2); //Zadawanie wypełnienia  PWM do tranzystora [0 3.3V]
 }
 
 /* USER CODE END 0 */
