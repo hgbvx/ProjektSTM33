@@ -59,9 +59,9 @@ char  rx_buffer [2];
 float duty = 0; // Wypelnienie PWM
 float inc = 30; //temperatura zadana
 
-float K_P_CMSIS = 100;
-float K_I_CMSIS = 0.025;
-float K_D_CMSIS = 20;
+float K_P_CMSIS = 1000; //1000;
+float K_I_CMSIS = 1; //0.025;
+float K_D_CMSIS = 10; //20;
 float pid_error;
 float pid_error_abs;
 
@@ -209,7 +209,7 @@ double temp;
 		   pid_error_abs = pid_error;
        else if (pid_error == 0)
     	   pid_error_abs = 0;
-       duty = arm_pid_f32(&PID, pid_error*10); //wypelnienie PWM
+       duty = arm_pid_f32(&PID, pid_error); //wypelnienie PWM
 
        if (duty > 1000) {
                        duty = 1000;
