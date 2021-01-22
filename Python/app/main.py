@@ -207,8 +207,9 @@ class Ui_MainWindow(object):
         if  temperatura_zadana >= 20 and temperatura_zadana <= 40:
             self.lcd1.display(temperatura_zadana)         #wyswietlana cyfra
             ##### Wysylanie temperatury przez uart
-            self.ser.write(temperatura_zadana) # trza zrobic
-            self.ser.close()
+            x = bytes(str(temperatura_zadana), 'ascii')
+            self.ser.write(x) # trza zrobic
+            #self.ser.close()
 
         else:
             self.show_popup()

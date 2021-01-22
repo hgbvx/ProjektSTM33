@@ -4444,21 +4444,21 @@ void  HAL_UART_RxCpltCallback(UART_HandleTypeDef  *huart)
  8002334:	4293      	cmp	r3, r2
  8002336:	d11c      	bne.n	8002372 <HAL_UART_RxCpltCallback+0x56>
 	{
-		inc = (((float)rx_buffer [1] - 48) +   ((float)rx_buffer [0] - 48)*10);  //-48
+		inc = (((float)rx_buffer [0] - 48)*10 +   ((float)rx_buffer [1] - 48));  //-48
  8002338:	4b10      	ldr	r3, [pc, #64]	; (800237c <HAL_UART_RxCpltCallback+0x60>)
- 800233a:	785b      	ldrb	r3, [r3, #1]
+ 800233a:	781b      	ldrb	r3, [r3, #0]
  800233c:	ee07 3a90 	vmov	s15, r3
  8002340:	eef8 7a67 	vcvt.f32.u32	s15, s15
  8002344:	ed9f 7a10 	vldr	s14, [pc, #64]	; 8002388 <HAL_UART_RxCpltCallback+0x6c>
- 8002348:	ee37 7ac7 	vsub.f32	s14, s15, s14
- 800234c:	4b0b      	ldr	r3, [pc, #44]	; (800237c <HAL_UART_RxCpltCallback+0x60>)
- 800234e:	781b      	ldrb	r3, [r3, #0]
- 8002350:	ee07 3a90 	vmov	s15, r3
- 8002354:	eef8 7a67 	vcvt.f32.u32	s15, s15
- 8002358:	eddf 6a0b 	vldr	s13, [pc, #44]	; 8002388 <HAL_UART_RxCpltCallback+0x6c>
- 800235c:	ee77 7ae6 	vsub.f32	s15, s15, s13
- 8002360:	eef2 6a04 	vmov.f32	s13, #36	; 0x41200000  10.0
- 8002364:	ee67 7aa6 	vmul.f32	s15, s15, s13
+ 8002348:	ee77 7ac7 	vsub.f32	s15, s15, s14
+ 800234c:	eeb2 7a04 	vmov.f32	s14, #36	; 0x41200000  10.0
+ 8002350:	ee27 7a87 	vmul.f32	s14, s15, s14
+ 8002354:	4b09      	ldr	r3, [pc, #36]	; (800237c <HAL_UART_RxCpltCallback+0x60>)
+ 8002356:	785b      	ldrb	r3, [r3, #1]
+ 8002358:	ee07 3a90 	vmov	s15, r3
+ 800235c:	eef8 7a67 	vcvt.f32.u32	s15, s15
+ 8002360:	eddf 6a09 	vldr	s13, [pc, #36]	; 8002388 <HAL_UART_RxCpltCallback+0x6c>
+ 8002364:	ee77 7ae6 	vsub.f32	s15, s15, s13
  8002368:	ee77 7a27 	vadd.f32	s15, s14, s15
  800236c:	4b07      	ldr	r3, [pc, #28]	; (800238c <HAL_UART_RxCpltCallback+0x70>)
  800236e:	edc3 7a00 	vstr	s15, [r3]
