@@ -83,7 +83,7 @@ void  HAL_UART_RxCpltCallback(UART_HandleTypeDef  *huart)
 
 	if (huart->Instance == USART3)
 	{
-		inc = (((float)rx_buffer [1] - 48) +   ((float)rx_buffer [0] - 48)*10);
+		inc = (((float)rx_buffer [1] - 48) +   ((float)rx_buffer [0] - 48)*10);  //-48
 
 	}
 }

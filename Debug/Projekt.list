@@ -4444,7 +4444,7 @@ void  HAL_UART_RxCpltCallback(UART_HandleTypeDef  *huart)
  8002334:	4293      	cmp	r3, r2
  8002336:	d11c      	bne.n	8002372 <HAL_UART_RxCpltCallback+0x56>
 	{
-		inc = (((float)rx_buffer [1] - 48) +   ((float)rx_buffer [0] - 48)*10);
+		inc = (((float)rx_buffer [1] - 48) +   ((float)rx_buffer [0] - 48)*10);  //-48
  8002338:	4b10      	ldr	r3, [pc, #64]	; (800237c <HAL_UART_RxCpltCallback+0x60>)
  800233a:	785b      	ldrb	r3, [r3, #1]
  800233c:	ee07 3a90 	vmov	s15, r3

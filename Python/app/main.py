@@ -9,16 +9,34 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtWidgets import QMessageBox
+import serial
+
 
 
 class Ui_MainWindow(object):
+
+    def __init__(self):
+        self.tmr_var = 0
+        self.Baudarate = 115200
+        self.Bytesize = serial.EIGHTBITS
+        self.Stopbits = serial.STOPBITS_ONE
+        self.ser = serial.Serial(
+            port='COM3',
+            baudrate=self.Baudarate,
+            parity=serial.PARITY_NONE,
+            stopbits=self.Stopbits,
+            bytesize=self.Bytesize,
+            timeout=0.1
+        )
+
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(509, 260)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.baudBox = QtWidgets.QComboBox(self.centralwidget)
-        self.baudBox.setGeometry(QtCore.QRect(40, 180, 69, 22))
+        self.baudBox.setGeometry(QtCore.QRect(40, 220, 69, 22))
         self.baudBox.setObjectName("baudBox")
         self.baudBox.addItem("")
         self.baudBox.addItem("")
@@ -35,33 +53,44 @@ class Ui_MainWindow(object):
         self.baudBox.addItem("")
         self.baudBox.addItem("")
         self.dataBox = QtWidgets.QComboBox(self.centralwidget)
-        self.dataBox.setGeometry(QtCore.QRect(130, 180, 69, 22))
+        self.dataBox.setGeometry(QtCore.QRect(130, 220, 69, 22))
         self.dataBox.setObjectName("dataBox")
         self.dataBox.addItem("")
         self.dataBox.addItem("")
         self.dataBox.addItem("")
         self.dataBox.addItem("")
         self.parityBox = QtWidgets.QComboBox(self.centralwidget)
-        self.parityBox.setGeometry(QtCore.QRect(220, 180, 69, 22))
+        self.parityBox.setGeometry(QtCore.QRect(220, 220, 69, 22))
         self.parityBox.setObjectName("parityBox")
         self.parityBox.addItem("")
         self.parityBox.addItem("")
         self.parityBox.addItem("")
         self.label = QtWidgets.QLabel(self.centralwidget)
-        self.label.setGeometry(QtCore.QRect(50, 160, 47, 13))
+        self.label.setGeometry(QtCore.QRect(50, 200, 47, 13))
         self.label.setObjectName("label")
         self.label_2 = QtWidgets.QLabel(self.centralwidget)
-        self.label_2.setGeometry(QtCore.QRect(140, 160, 47, 13))
+        self.label_2.setGeometry(QtCore.QRect(140, 200, 47, 13))
         self.label_2.setObjectName("label_2")
         self.label_3 = QtWidgets.QLabel(self.centralwidget)
-        self.label_3.setGeometry(QtCore.QRect(230, 160, 47, 13))
+        self.label_3.setGeometry(QtCore.QRect(230, 200, 47, 13))
         self.label_3.setObjectName("label_3")
+
         self.lcd = QtWidgets.QLCDNumber(self.centralwidget)
         self.lcd.setGeometry(QtCore.QRect(60, 40, 131, 61))
         self.lcd.setObjectName("lcd")
+
+        self.lcd1 = QtWidgets.QLCDNumber(self.centralwidget)
+        self.lcd1.setGeometry(QtCore.QRect(60, 120, 131, 61))
+        self.lcd1.setObjectName("lcd1")
+
         self.label_4 = QtWidgets.QLabel(self.centralwidget)
         self.label_4.setGeometry(QtCore.QRect(70, 20, 111, 16))
         self.label_4.setObjectName("label_4")
+
+        self.label_6 = QtWidgets.QLabel(self.centralwidget)
+        self.label_6.setGeometry(QtCore.QRect(70, 105, 111, 16))
+        self.label_6.setObjectName("label_6")
+
         self.temp_input = QtWidgets.QLineEdit(self.centralwidget)
         self.temp_input.setGeometry(QtCore.QRect(330, 50, 113, 20))
         self.temp_input.setObjectName("temp_input")
@@ -80,8 +109,13 @@ class Ui_MainWindow(object):
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
 
+        self.baudBox.setCurrentIndex(11)
+        self.dataBox.setCurrentIndex(3)
+
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
+
+
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -112,8 +146,92 @@ class Ui_MainWindow(object):
         self.label_3.setText(_translate("MainWindow", "Stop bits"))
         self.label_4.setText(_translate("MainWindow", "Aktualna temperatura"))
         self.label_5.setText(_translate("MainWindow", "Zadana temperatura"))
+        self.label_6.setText(_translate("MainWindow", "Zadana temperatura"))
         self.button.setText(_translate("MainWindow", "Wyślij"))
 
+
+
+        #LCD Wyswietlanie temperatury
+        self.lcd1.setDigitCount(2)  #liczba wyswietlanych cyfr
+        self.lcd1.display(20)         #wyswietlana cyfra
+
+        self.lcd.setDigitCount(5)
+
+        #timer
+
+        self.timer = QtCore.QTimer()
+        self.timer.timeout.connect(self.updateTemp)
+        self.timer.timeout.connect(self.updateSerial)
+        self.timer.start(100)
+
+
+
+        self.button.clicked.connect(self.click)
+
+    def updateSerial(self):
+
+        x = int(self.baudBox.currentText())         #baud
+        y = int(self.dataBox.currentText())        #data
+        z = float(self.parityBox.currentText())    #stop
+
+        # baud rate
+        self.Baudarate = x
+
+        # data bits
+        if y == 5:
+            self.Bytesize = serial.FIVEBITS
+        if y == 6:
+            self.Bytesize = serial.SIXBITS
+        if y == 7:
+            self.Bytesize = serial.SEVENBITS
+        if y == 8:
+            self.Bytesize = serial.EIGHTBITS
+
+        # stop bits
+        if z == 1.0:
+            self.Stopbits = serial.STOPBITS_ONE
+        if z == 1.5:
+            self.Stopbits = serial.STOPBITS_ONE_POINT_FIVE
+        if z == 2.0:
+            self.Stopbits = serial.STOPBITS_TWO
+
+    def updateTemp(self):
+        self.data = self.ser.readline()
+        if self.data:
+            self.data = self.data.decode()
+            self.lcd.display(float(self.data))
+
+
+    def click(self): ## wyslanie zadanej temperatury
+        temperatura_zadana = int(self.temp_input.text())
+        if  temperatura_zadana >= 20 and temperatura_zadana <= 40:
+            self.lcd1.display(temperatura_zadana)         #wyswietlana cyfra
+            ##### Wysylanie temperatury przez uart
+            self.ser.write(temperatura_zadana) # trza zrobic
+            self.ser.close()
+
+        else:
+            self.show_popup()
+
+
+    def show_popup(self):
+        msg = QMessageBox()
+        msg.setWindowTitle("Error")
+        msg.setText("Wartość temperatury musi być z zakresu 20-40°C")
+        msg.setIcon(QMessageBox.Critical)
+        msg.setStandardButtons(QMessageBox.Cancel)
+        msg.setDefaultButton(QMessageBox.Cancel)
+        x = msg.exec_()
+
+
+    def show_popup1(self):
+        msg = QMessageBox()
+        msg.setWindowTitle("Error")
+        msg.setText("Nie otrzymano wartosci temperatury")
+        msg.setIcon(QMessageBox.Critical)
+        msg.setStandardButtons(QMessageBox.Retry)
+        msg.setDefaultButton(QMessageBox.Retry)
+        x = msg.exec_()
 
 if __name__ == "__main__":
     import sys
