@@ -57,10 +57,10 @@
 /* USER CODE BEGIN PV */
 char  rx_buffer [2];
 float duty = 0; // Wypelnienie PWM
-float inc = 30; //temperatura zadana
+float inc = 20; //temperatura zadana
 
-float K_P_CMSIS = 1000; //1000;
-float K_I_CMSIS = 1; //0.025;
+float K_P_CMSIS = 125; //400;
+float K_I_CMSIS = 0.5; //1;
 float K_D_CMSIS = 10; //20;
 float pid_error;
 float pid_error_abs;
@@ -241,7 +241,7 @@ double temp;
        sprintf(str, "%f", temp);
 
        tx_status = HAL_UART_Transmit(&huart3,(uint8_t*) str, 5, 100); // Wyslanie temperatury
-      //HAL_Delay(100); //czas odczytu
+      //HAL_Delay(1000); //czas odczytu
 
 
     /* USER CODE END WHILE */

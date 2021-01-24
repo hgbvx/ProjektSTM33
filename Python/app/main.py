@@ -32,7 +32,7 @@ class Ui_MainWindow(object):
 
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(509, 260)
+        MainWindow.resize(509, 270)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.baudBox = QtWidgets.QComboBox(self.centralwidget)
@@ -119,7 +119,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "Regulacja temperatury"))
         self.baudBox.setItemText(0, _translate("MainWindow", "600"))
         self.baudBox.setItemText(1, _translate("MainWindow", "1200"))
         self.baudBox.setItemText(2, _translate("MainWindow", "2400"))
