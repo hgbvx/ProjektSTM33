@@ -55,7 +55,7 @@ main-build: Projekt.elf secondary-outputs
 
 # Tool invocations
 Projekt.elf: $(OBJS) $(USER_OBJS) C:\Users\Lenovo\STM32CubeIDE\workspace_1.4.0\Projekt\STM32F746ZGTX_FLASH.ld
-	arm-none-eabi-gcc -o "Projekt.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m7 -T"C:\Users\Lenovo\STM32CubeIDE\workspace_1.4.0\Projekt\STM32F746ZGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Projekt.map" -Wl,--gc-sections -static -u_print_float --specs=nano.specs -mfpu=fpv5-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -u _scanf_float -Wl,--start-group -lc -lm -Wl,--end-group
+	arm-none-eabi-gcc -o "Projekt.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m7 -T"C:\Users\Lenovo\STM32CubeIDE\workspace_1.4.0\Projekt\STM32F746ZGTX_FLASH.ld" --specs=nosys.specs -Wl,-Map="Projekt.map" -Wl,--gc-sections -static -L"C:\Users\Lenovo\STM32Cube\Repository\Packs\ARM\CMSIS\5.7.0\CMSIS\DSP\Lib\GCC" -u_print_float --specs=nano.specs -mfpu=fpv5-sp-d16 -mfloat-abi=hard -mthumb -u _printf_float -u _scanf_float -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
