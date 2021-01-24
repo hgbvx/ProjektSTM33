@@ -60,7 +60,7 @@ float duty = 0; // Wypelnienie PWM
 float inc = 20; //temperatura zadana
 
 float K_P_CMSIS = 125; //400;
-float K_I_CMSIS = 0.5; //1;
+float K_I_CMSIS = 0.25; //0.5;
 float K_D_CMSIS = 10; //20;
 float pid_error;
 float pid_error_abs;
