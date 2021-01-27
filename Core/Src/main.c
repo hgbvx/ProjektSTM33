@@ -158,8 +158,6 @@ double temp;
   conf.filter = BMP280_FILTER_OFF;
   /* Temperature oversampling set at 4x */
   conf.os_temp = BMP280_OS_1X;
-  /* Pressure over sampling none (disabling pressure measurement) */
-  conf.os_pres = BMP280_OS_1X;
 
   /* Setting the output data rate as 4HZ(250ms) */
   conf.odr = BMP280_ODR_1000_MS;
@@ -202,40 +200,22 @@ double temp;
        bmp280_1.delay_ms(1000);
 
        pid_error = inc - temp; //blad
-       //pid_error_abs = abs(pid_error);
-       if (pid_error < 0)
-    	   pid_error_abs = -pid_error;
-       else if (pid_error > 0)
-		   pid_error_abs = pid_error;
-       else if (pid_error == 0)
-    	   pid_error_abs = 0;
+
+
+
        duty = arm_pid_f32(&PID, pid_error); //wypelnienie PWM
 
-       if (duty > 1000) {
-                       duty = 1000;
-                   } else if (duty < 0) {
-                       duty = 0;
-                   }
-
-
-
-       //if(inc - temp < 2)
-    	 //  duty /= 3;
+       if (duty > 1000)
+       	   {
+    	   	   duty = 1000;
+           }
+       else if (duty < 0)
+       	   {
+               duty = 0;
+       	   }
 
 	   __HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_4,duty); //zalacz grzalke
 
-
-	   //__HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_4,duty*10); //zalacz grzalke
-
-
-    /*   if (pid_error >0) {
-    	   //zalacz wntylator
-    	   __HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_4,0); //wylacz grzalke
-       }
-       else if(pid_error <0){
-    	   __HAL_TIM_SET_COMPARE(&htim3,TIM_CHANNEL_4,duty); //zalacz grzalke
-    	   //wylacz wentylator
-       } */
 
 
        sprintf(str, "%f", temp);
